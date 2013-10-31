@@ -27,6 +27,10 @@ class Opencv < Formula
   # in Homebrew anyway. Will depend on openexr if it's installed.
   depends_on 'ffmpeg' => :optional
 
+  def patches
+    DATA
+  end
+
   def install
     args = std_cmake_args + %W[
       -DCMAKE_OSX_DEPLOYMENT_TARGET=
@@ -38,8 +42,6 @@ class Opencv < Formula
       -DBUILD_JASPER=OFF
       -DBUILD_TESTS=OFF
       -DBUILD_PERF_TESTS=OFF
-      -DPYTHON_INCLUDE_DIR='#{python.incdir}'
-      -DPYTHON_LIBRARY='#{python.libdir}/lib#{python.xy}.dylib'
       -DPYTHON_EXECUTABLE='#{python.binary}'
     ]
 
@@ -67,3 +69,26 @@ class Opencv < Formula
     python.standard_caveats if python
   end
 end
+__END__
+diff --git a/modules/legacy/src/dpstereo.cpp b/modules/legacy/src/dpstereo.cpp
+index a55e1ca..2f8607d 100644
+--- a/modules/legacy/src/dpstereo.cpp
++++ b/modules/legacy/src/dpstereo.cpp
+@@ -77,7 +77,7 @@ typedef struct _CvRightImData
+ } _CvRightImData;
+ 
+ #define CV_IMAX3(a,b,c) ((temp3 = (a) >= (b) ? (a) : (b)),(temp3 >= (c) ? temp3 : (c)))
+-#define CV_IMIN3(a,b,c) ((temp3 = (a) <= (b) ? (a) : (b)),(temp3 <= (c) ? temp3 : (c)))
++#define CV_IMIN3(a,b,c) ((temp2 = (a) <= (b) ? (a) : (b)),(temp2 <= (c) ? temp2 : (c)))
+ 
+ static void icvFindStereoCorrespondenceByBirchfieldDP( uchar* src1, uchar* src2,
+                                                 uchar* disparities,
+@@ -87,7 +87,7 @@ static void icvFindStereoCorrespondenceByBirchfieldDP( uchar* src1, uchar* src2,
+                                                 float  _param3, float _param4,
+                                                 float  _param5 )
+ {
+-    int     x, y, i, j, temp3;
++    int     x, y, i, j, temp2, temp3;
+     int     d, s;
+     int     dispH =  maxDisparity + 3;
+     uchar  *dispdata;
